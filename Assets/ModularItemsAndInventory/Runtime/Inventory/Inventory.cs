@@ -19,10 +19,28 @@ namespace ModularItemsAndInventory.Runtime.Inventory {
     /// </remarks>
     [DisallowMultipleComponent]
     public class Inventory : MonoBehaviour, IEnumerable<KeyValuePair<Item, int>> {
+        public enum OperationType { AddItem, RemoveItem }
+        
+        public struct ItemOperation {
+            public Item Item { get; }
+            public int OldQuantity { get; }
+            public int CurrentQuantity { get; }
+            public OperationType OperationType { get; }
+            
+            public ItemOperation(Item item, int oldQuantity, int currentQuantity, OperationType operationType) {
+                this.Item = item;
+                this.OldQuantity = oldQuantity;
+                this.CurrentQuantity = currentQuantity;
+                this.OperationType = operationType;
+            }
+        }
+        
         [field: SerializeField] private ItemTypeDefinitionContext DefinedItemTypes { get; set; }
 
         private Dictionary<ItemTypeDefinition, Dictionary<Item, int>> Items { get; set; } =
             new Dictionary<ItemTypeDefinition, Dictionary<Item, int>>();
+        
+        public event Action<ItemOperation> OnInventoryChanged;
 
         /// <summary>
         /// Provides indexer access to retrieve items of a specific type definition stored in the inventory.
@@ -101,14 +119,19 @@ namespace ModularItemsAndInventory.Runtime.Inventory {
             if (!this.CanStore(item)) {
                 return false;
             }
-            
+
+            int oldQty = 0;
+            int currQty;
             ItemTypeDefinition type = item.Type;
             if (this.Items.TryGetValue(type, out Dictionary<Item, int> record)) {
-                record[item] = record.GetValueOrDefault(item, 0) + quantity;
+                oldQty = record.GetValueOrDefault(item, 0);
+                currQty = record[item] = oldQty + quantity;
             } else {
+                currQty = quantity;
                 this.Items.Add(type, new Dictionary<Item, int> { { item, quantity } });
             }
 
+            this.OnInventoryChanged?.Invoke(new ItemOperation(item, oldQty, currQty, OperationType.AddItem));
             return true;
         }
 
@@ -117,8 +140,8 @@ namespace ModularItemsAndInventory.Runtime.Inventory {
         /// </summary>
         /// <param name="item">The item to remove from the inventory.</param>
         public void RemoveAll([NotNull] Item item) {
-            if (this.Items.TryGetValue(item.Type, out Dictionary<Item, int> record)) {
-                record.Remove(item);
+            if (this.Items.TryGetValue(item.Type, out Dictionary<Item, int> record) && record.Remove(item, out int count)) {
+                this.OnInventoryChanged?.Invoke(new ItemOperation(item, count, 0, OperationType.RemoveItem));
             }
         }
 
@@ -169,6 +192,7 @@ namespace ModularItemsAndInventory.Runtime.Inventory {
                 record.Remove(item);
             }
 
+            this.OnInventoryChanged?.Invoke(new ItemOperation(item, count, remaining, OperationType.RemoveItem));
             return true;
         }
 
