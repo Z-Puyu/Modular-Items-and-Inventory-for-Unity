@@ -2,9 +2,10 @@
 using UnityEngine;
 
 namespace ModularItemsAndInventory.Runtime.Items.Properties {
-    public class Merchandise : ItemProperty {
+    public sealed class Merchandise : ItemProperty {
         [field: SerializeField] public int Price { get; private set; }
         [field: SerializeField] private bool HasDifferentPriceForSale { get; set; }
+        
         [field: SerializeField, ShowIf(nameof(this.HasDifferentPriceForSale))] 
         [field: OnValueChanged(nameof(this.UnifyPrices))]
         public int Worth { get; private set; }

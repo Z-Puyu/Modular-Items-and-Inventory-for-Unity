@@ -3,6 +3,14 @@ using System.Text;
 using UnityEngine;
 
 namespace ModularItemsAndInventory.Runtime.Items {
+    /// <summary>
+    /// Represents a base definition for item types within the modular items and inventory system.
+    /// Serves as an abstract base class for specific item types and categories.
+    /// </summary>
+    /// <remarks>
+    /// This class provides shared functionality to item types and categories,
+    /// including name, category assignments, and comparison logic.
+    /// </remarks>
     public abstract class ItemTypeDefinition : ScriptableObject, IComparable<ItemTypeDefinition> {
         [field: SerializeField] public string Name { get; private set; }
         [field: SerializeField] public ItemCategory Category { get; private set; }

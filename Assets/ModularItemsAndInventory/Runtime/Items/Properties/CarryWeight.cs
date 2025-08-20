@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace ModularItemsAndInventory.Runtime.Items.Properties {
-    public class CarryWeight : ItemProperty {
+    public sealed class CarryWeight : ItemProperty {
         [field: SerializeField, MinValue(0)] public int Weight { get; private set; }
         
         protected override int CompareToSameType(IItemProperty otherOfSameType) {
