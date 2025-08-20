@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ModularItemsAndInventory.Runtime.Items;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ModularItemsAndInventory.Runtime.Inventory {
     /// <summary>
@@ -40,7 +41,7 @@ namespace ModularItemsAndInventory.Runtime.Inventory {
         private Dictionary<ItemTypeDefinition, Dictionary<Item, int>> Items { get; set; } =
             new Dictionary<ItemTypeDefinition, Dictionary<Item, int>>();
         
-        public event Action<ItemOperation> OnInventoryChanged;
+        public event UnityAction<ItemOperation> OnInventoryChanged;
 
         /// <summary>
         /// Provides indexer access to retrieve items of a specific type definition stored in the inventory.
