@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-namespace ModularItemsAndInventory.Runtime.Items {
+namespace ModularItemsAndInventory.Runtime.Items.Properties {
     public sealed class ItemProperties : IEquatable<ItemProperties>, IComparable<ItemProperties> {
         private Item OwningItem { get; }
 
@@ -18,7 +19,7 @@ namespace ModularItemsAndInventory.Runtime.Items {
             }
         }
 
-        public bool HasExactly<P>(out P property) where P : IItemProperty {
+        public bool HaveExactly<P>(out P property) where P : IItemProperty {
             if (this.Properties.TryGetValue(typeof(P), out IItemProperty p)) {
                 property = (P)p;
                 return true;
@@ -28,16 +29,16 @@ namespace ModularItemsAndInventory.Runtime.Items {
             return false;
         }
 
-        public bool HasExactly<P>() where P : IItemProperty {
+        public bool HaveExactly<P>() where P : IItemProperty {
             return this.Properties.ContainsKey(typeof(P));
         }
 
-        public bool Has<P>() where P : IItemProperty {
+        public bool Have<P>() where P : IItemProperty {
             Type type = typeof(P);
             return this.Properties.Keys.Any(k => type.IsAssignableFrom(k));
         }
 
-        public bool Has<P>(out IEnumerable<P> properties) where P : IItemProperty {
+        public bool Have<P>(out IEnumerable<P> properties) where P : IItemProperty {
             properties = this.Properties.Values.OfType<P>();
             return properties.Any();
         }
@@ -51,7 +52,26 @@ namespace ModularItemsAndInventory.Runtime.Items {
         }
 
         internal ItemProperties With(IItemProperty property) {
-            this.Properties[property.GetType()] = property;
+            Type type = property.GetType();
+            if (this.Properties.ContainsKey(type)) {
+                Debug.LogWarning($"Duplicate property {property.GetType()} will be ignored.");
+            } else {
+                this.Properties.Add(type, property.Instantiate());
+            }
+
+            return this;
+        }
+
+        internal ItemProperties With(IEnumerable<IItemProperty> props) {
+            foreach (IItemProperty p in props) {
+                Type type = p.GetType();
+                if (this.Properties.ContainsKey(type)) {
+                    Debug.LogWarning($"Duplicate property {p.GetType()} will be ignored.");
+                } else {
+                    this.Properties.Add(type, p.Instantiate());
+                }
+            }
+            
             return this;
         }
         

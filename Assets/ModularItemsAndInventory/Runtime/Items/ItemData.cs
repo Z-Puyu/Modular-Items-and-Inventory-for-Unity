@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ModularItemsAndInventory.Runtime.Items.Properties;
 using SaintsField;
 using UnityEngine;
 
@@ -7,9 +8,10 @@ namespace ModularItemsAndInventory.Runtime.Items {
     public class ItemData : ScriptableObject {
         [field: SerializeField] public ItemType Type { get; private set; } 
         [field: SerializeField] public string Name { get; private set; }
-        /*[field: SerializeReference, RichLabel(nameof(this.Label), true)] 
-        public List<IItemPropertyData> ItemProperties { get; private set; } = [];
 
-        private string Label(object obj, int _) => obj.GetType().Name;*/
+        [field: SerializeReference, RichLabel(nameof(this.LabelProperty), true)]
+        public List<IItemProperty> Properties { get; private set; } = new List<IItemProperty>();
+
+        private string LabelProperty(object prop, int _) => prop.GetType().Name;
     }
 }
